@@ -1,6 +1,9 @@
 package com.example.springboot.webflux.app.models;
 
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,13 +22,14 @@ public class Product {
     @Id
     private String id;
 
-    //@NotEmpty
+    @NotEmpty(message = "should not be empty")
     private String name;
 
-    //@NotNull
+    @NotNull(message = "should not be null")
     private Double price;
     private LocalDateTime createdAt;
-    //@Valid
+    @Valid
+    @NotNull(message = "should have a valid category")
     private Category category;
     private String picture;
 
