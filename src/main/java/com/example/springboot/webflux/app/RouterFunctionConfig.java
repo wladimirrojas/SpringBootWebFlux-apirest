@@ -16,6 +16,9 @@ public class RouterFunctionConfig {
     @Bean
     public RouterFunction<ServerResponse> routes(ProductHandler handler) {
         return route(GET("/api/v2/products").or(GET("/api/v3/products")), handler::toList)
-                .andRoute(GET("api/v2/products/{id}"), handler::details);
+                .andRoute(GET("/api/v2/products/{id}"), handler::details)
+                .andRoute(POST("api/v2/products"), handler::save)
+                .andRoute(PUT("/api/v2/products/{id}"), handler::update)
+                .andRoute(DELETE("/api/v2/products/{id}"), handler::delete);
     }
 }
