@@ -9,6 +9,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static org.springframework.web.reactive.function.BodyInserters.*;
@@ -37,4 +39,41 @@ public class ProductHandler {
                        .body(fromValue(p)))
                .switchIfEmpty(ServerResponse.notFound().build());
     }
+
+    public Mono<ServerResponse> save(ServerRequest request) {
+        Mono<Product> product = request.bodyToMono(Product.class);
+
+        return product.flatMap(p -> {
+            if (p.getCreatedAt() == null) p.setCreatedAt(LocalDateTime.now());
+            return service.save(p);
+        }).flatMap(p -> ServerResponse.created(URI.create("/api/v2/products/" + p.getId()))
+                .body(fromValue(p)));
+    }
+
+    public Mono<ServerResponse> update(ServerRequest request) {
+        Mono<Product> product = request.bodyToMono(Product.class);
+        String id = request.pathVariable("id");
+
+        Mono<Product> productFromDb = service.findById(id);
+
+        return productFromDb.zipWith(product, (db, req) -> {
+            db.setName(req.getName());
+            db.setPrice(req.getPrice());
+            db.setCategory(req.getCategory());
+            return db;
+        }).flatMap(p -> ServerResponse.created(URI.create("/api/v2/products/" + p.getId()))
+                .body(service.save(p), Product.class))
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> delete(ServerRequest request) {
+        String id = request.pathVariable("id");
+        Mono<Product> productFromDb = service.findById(id);
+
+        return productFromDb.flatMap(product -> service.delete(product).then(ServerResponse.noContent().build()))
+                .switchIfEmpty(ServerResponse.notFound().build());
+
+
+    }
+
 }
