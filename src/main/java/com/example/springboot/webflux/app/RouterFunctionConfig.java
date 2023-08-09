@@ -13,6 +13,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 @Configuration
 public class RouterFunctionConfig {
 
+    //mensaje pal mau
     @Bean
     public RouterFunction<ServerResponse> routes(ProductHandler handler) {
         return route(GET("/api/v2/products").or(GET("/api/v3/products")), handler::toList)
